@@ -90,9 +90,7 @@ class LZW {
             raf.close();
         }
         catch(Exception e) { e.printStackTrace(); }
-
-        for(int i)
-
+        
         // -------------------------------------------------------------- //
     }
 }
