@@ -54,6 +54,8 @@ class LZW {
 
             if(i == origin.length() - 1) break;
         }
+
+        for(Integer i : output) System.out.print(dictionary.get(i));
         return output;
     }
 
@@ -90,7 +92,9 @@ class LZW {
             raf.close();
         }
         catch(Exception e) { e.printStackTrace(); }
-        
+
+        compact(s);
+
         // -------------------------------------------------------------- //
     }
 }
