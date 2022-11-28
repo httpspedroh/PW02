@@ -5,7 +5,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.PriorityQueue;
 
-public class Huffman {
+class Huffman {
+    
     class Node {
         public int frequency;
         public char data;

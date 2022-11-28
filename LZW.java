@@ -1,10 +1,9 @@
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 class LZW {
 
-    public static String compact(String origin) {
+    public static ArrayList<Integer> compact(String origin) {
 
         origin = origin.replaceAll(" ", "_");
 
@@ -55,12 +54,12 @@ class LZW {
 
             if(i == origin.length() - 1) break;
         }
-        return output.toString();
+        return output;
     }
 
     public static void main(String[] args) throws Exception {
         
-        String s = new String();
+        String s = "";
 
         try {
 
@@ -68,19 +67,31 @@ class LZW {
 
             RandomAccessFile raf = new RandomAccessFile(source, "rw");
 
-            if(source.equals("accounts.bin")) raf.seek(4);
-            else raf.seek(0);
+            s += raf.readInt();
+            
+            while(raf.getFilePointer() < raf.length() - 1) {
 
-            while(raf.getFilePointer() < raf.length()) {
+                s += raf.readByte();
+                s += raf.readInt();
+                s += raf.readInt();
 
-                s += raf.readChar();
+                for(int x = 0; x < 5; x++) s += raf.readUTF();
+
+                s += raf.readFloat();
+                s += raf.readInt();
+
+                int emailsCount = raf.readInt();
+
+                s += emailsCount;
+                
+                for(int i = 0; i < emailsCount; i++) s += raf.readUTF();
             }
-        
+
             raf.close();
         }
         catch(Exception e) { e.printStackTrace(); }
 
-        System.out.println(s);
+        for(int i)
 
         // -------------------------------------------------------------- //
     }
