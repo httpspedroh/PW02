@@ -67,7 +67,7 @@ public class Main {
             System.out.println("6 - ORDENAR REGISTROS");
             System.out.println("7 - LISTAR REGISTROS");
             System.out.println("8 - LZW");
-            System.out.println("9 - Compactar e descompactar Huffman");
+            System.out.println("9 - HUFFMAN");
             System.out.println("================================\n");
 
             // ----------------------------------------------------------- //
