@@ -1,9 +1,12 @@
+import java.io.File;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 
 class LZW {
 
-    public static ArrayList<Integer> compact(String source) throws Exception {
+    // ---------------------------------------------------------------------------------------------- //
+
+    public static void compress(String source, String destin) throws Exception {
 
         // --------------------------------------------------- //
 
@@ -13,59 +16,41 @@ class LZW {
         try {
 
             RandomAccessFile raf = new RandomAccessFile(source, "rw");
-            
-            int tmp_int = 0;
-            float tmp_float = 0;
-            String tmp_string = "";
 
             // read globalId
-            tmp_int = raf.readInt();
-            originString += Integer.toString(tmp_int).length();
-            originString += tmp_int;
-  
+            originString += raf.readInt() + "~";
+   
             while(raf.getFilePointer() < raf.length() - 1) {
 
-                originString += raf.readByte(); // read lapide
-
+                // read lapide
+                originString += raf.readByte() + "~";
+               
                 // read size
-                tmp_int = raf.readInt();
-                originString += Integer.toString(tmp_int).length();
-                originString += tmp_int;
+                originString += raf.readInt() + "~";
 
                 // read Id
-                tmp_int = raf.readInt();
-                originString += Integer.toString(tmp_int).length();
-                originString += tmp_int;
-
+                originString += raf.readInt() + "~";
+       
                 // read name, user, pass, cpf, city
                 for(int x = 0; x < 5; x++) {
 
-                    tmp_string = raf.readUTF();
-                    originString += tmp_string.length();
-                    originString += tmp_string;
+                    originString += raf.readUTF() + "~";
                 }
 
                 // read balance
-                tmp_float = raf.readFloat();
-                originString += Float.toString(tmp_float).length();
-                originString += tmp_float;
+                originString += raf.readFloat() + "~";
 
                 // read transactions
-                tmp_int = raf.readInt();
-                originString += Integer.toString(tmp_int).length();
-                originString += tmp_int;
+                originString += raf.readInt() + "~";
 
                 // read emails number
-                tmp_int = raf.readInt();
-                originString += Integer.toString(tmp_int).length();
-                originString += tmp_int;
+                int emailsNumber = raf.readInt();
+                originString += emailsNumber + "~";
 
                 // read emails
-                for(int i = 0; i < tmp_int; i++) {
+                for(int i = 0; i < emailsNumber; i++) {
                     
-                    tmp_string = raf.readUTF();
-                    originString += tmp_string.length();
-                    originString += tmp_string;
+                    originString += raf.readUTF() + "~";
                 }
             }
 
@@ -73,12 +58,12 @@ class LZW {
         }
         catch(Exception e) { e.printStackTrace(); }
 
-        System.out.println(originString);
+        System.out.println("Compressing: " + originString);
 
         // --------------------------------------------------- //
 
         // 2. Create dictionary
-        originString = originString.replaceAll(" ", "_");
+        originString = originString.replaceAll(" ", "\\^");
 
         ArrayList<String> dictionary = new ArrayList<String>();
 
@@ -128,10 +113,15 @@ class LZW {
             if(i == originString.length() - 1) break;
         }
 
+        for(int i = 0; i < dictionary.size(); i++) {
+
+            System.out.println(i + " | " + dictionary.get(i));
+        }
+
         // -------------------------------------------------------------- //
 
         // 4. Create compressed file
-        RandomAccessFile raf = new RandomAccessFile("compactado.pedrip", "rw");
+        RandomAccessFile raf = new RandomAccessFile(destin, "rw");
 
         raf.writeInt(dictionary.size());
 
@@ -153,13 +143,98 @@ class LZW {
         }
 
         raf.close();
-        return output;
+
+        // -------------------------------------------------------------- //
+
+        new File(source).delete();
+    }
+
+    // ---------------------------------------------------------------------------------------------- //
+    
+    public static void decompress(String source, String destin) {
+
+        ArrayList<String> dictionary = new ArrayList<String>();
+        ArrayList<Integer> output = new ArrayList<Integer>();
+
+        // -------------------------------------------------------------- //
+
+        // 1. Read dictionary and output
+        try {
+
+            RandomAccessFile raf = new RandomAccessFile(source, "rw");
+
+            int dictionarySize = raf.readInt();
+
+            for(int i = 0; i < dictionarySize; i++) dictionary.add(raf.readUTF());
+
+            int outputSize = raf.readInt();
+
+            if(dictionarySize < 256) {
+
+                for(int i = 0; i < outputSize; i++) output.add((int)raf.readByte());
+            }
+            else if(dictionarySize < 65536) {
+
+                for(int i = 0; i < outputSize; i++) output.add((int)raf.readShort());
+            }
+            else {
+
+                for(int i = 0; i < outputSize; i++) output.add(raf.readInt());
+            }
+
+            // -------------------------------------------------------------- //
+
+            raf.close();
+        }
+        catch(Exception e) { e.printStackTrace(); }
+
+        // -------------------------------------------------------------- //
+
+        // 2. Create descompact string
+        String file = "";
+
+        for(int i : output) file += dictionary.get(i);
+
+        file = file.replaceAll("\\^", " ");
+
+        // -------------------------------------------------------------- //
+
+        // 3. Create descompact file
+        String args[] = file.split("~");
+
+        try {
+            
+            RandomAccessFile raf = new RandomAccessFile(destin, "rw");
+
+            raf.writeInt(Integer.parseInt(args[0]));
+
+            for(int i = 1; i < args.length; i++) {
+
+                raf.writeByte(Byte.parseByte(args[i]));
+                raf.writeInt(Integer.parseInt(args[++i]));
+                raf.writeInt(Integer.parseInt(args[++i]));
+                
+                for(int x = 0; x < 5; x++) raf.writeUTF(args[++i]);
+
+                raf.writeFloat(Float.parseFloat(args[++i]));
+                raf.writeInt(Integer.parseInt(args[++i]));
+
+                int emails_count = Integer.parseInt(args[++i]);
+                
+                raf.writeInt(emails_count);
+
+                for(int j = 0; j < emails_count; j++) raf.writeUTF(args[++i]);
+            }
+
+            raf.close();
+        }
+        catch(Exception e) { e.printStackTrace(); }
+
+        // -------------------------------------------------------------- //
+
+        new File(source).delete();
     }
 
     // ------------------------------------------------------------------------------------------------------------ //
 
-    public static void main(String[] args) throws Exception {
-
-        compact(Main.DEFAULT_FILE);
-    }
 }

@@ -49,6 +49,7 @@ public class Main {
             System.out.println("5 - DELETAR REGISTRO");
             System.out.println("6 - ORDENAR REGISTROS");
             System.out.println("7 - LISTAR REGISTROS");
+            System.out.println("8 - LZW");
             System.out.println("================================\n");
 
             // ----------------------------------------------------------- //
@@ -60,7 +61,7 @@ public class Main {
 
                     option = scr.nextInt(); 
 
-                    if(option < 0 || option > 7) System.out.println("x Opcao invalida!");
+                    if(option < 0 || option > 8) System.out.println("x Opcao invalida!");
                 }
                 catch (Exception e) { 
 
@@ -70,7 +71,7 @@ public class Main {
                     break;
                 }
             }
-            while(option < 0 || option > 7);
+            while(option < 0 || option > 8);
 
             // Option execution
             switch(option) {
@@ -508,6 +509,67 @@ public class Main {
                         System.out.println("==================================\n");
                     }
                     break;
+                }
+
+                // ----------------------------------------------------------- //
+
+                case 8: {
+
+                    System.out.println("\n========== LZW ==========");
+
+                    System.out.println("0 - VOLTAR");
+                    System.out.println("1 - COMPACTAR");
+                    System.out.println("2 - DESCOMPACTAR");
+
+                    int lzwOption = 0;
+
+                    do {
+
+                        try { 
+
+                            lzwOption = scr.nextInt(); 
+
+                            if(lzwOption < 0 || lzwOption > 2) System.out.println("x Opcao invalida!");
+                        }
+                        catch (Exception e) { 
+
+                            System.out.println("x Digite apenas numeros!"); 
+
+                            scr.next();
+                        }
+                    }
+                    while(lzwOption < 0 || lzwOption > 2);
+
+                    // -------------------------- //
+
+                    switch(lzwOption) {
+
+                        case 0: break;
+
+                        case 1: {
+
+                            System.out.println("\n========== COMPACTAR ==========");
+                            System.out.println("> Digite o nome do arquivo de saída: ");
+                            String fileName = scr.next();
+
+                            LZW.compress(Main.DEFAULT_FILE, fileName);
+
+                            System.out.println("\n>>> Arquivo compactado com sucesso em \"" + fileName + "\"!");
+                            break;
+                        }
+
+                        case 2: {
+
+                            System.out.println("\n========== DESCOMPACTAR ==========");
+                            System.out.println("> Digite o nome do arquivo compactado: ");
+                            String fileName = scr.next();
+
+                            LZW.decompress(fileName, Main.DEFAULT_FILE);
+
+                            System.out.println("\n>>> Arquivo descompactado com sucesso em \"" + Main.DEFAULT_FILE + "\"!");
+                            break;
+                        }
+                    }
                 }
             }
         }
