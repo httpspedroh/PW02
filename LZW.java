@@ -58,8 +58,6 @@ class LZW {
         }
         catch(Exception e) { e.printStackTrace(); }
 
-        System.out.println("Compressing: " + originString);
-
         // --------------------------------------------------- //
 
         // 2. Create dictionary
@@ -111,11 +109,6 @@ class LZW {
             // --------------- //
 
             if(i == originString.length() - 1) break;
-        }
-
-        for(int i = 0; i < dictionary.size(); i++) {
-
-            System.out.println(i + " | " + dictionary.get(i));
         }
 
         // -------------------------------------------------------------- //
