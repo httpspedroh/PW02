@@ -3,37 +3,110 @@ import java.util.ArrayList;
 
 class LZW {
 
-    public static ArrayList<Integer> compact(String origin) {
+    public static ArrayList<Integer> compact(String source) throws Exception {
 
-        origin = origin.replaceAll(" ", "_");
+        // --------------------------------------------------- //
 
-        // create a dictionary
+        // 1. Convert original file to string
+        String originString = "";
+
+        try {
+
+            RandomAccessFile raf = new RandomAccessFile(source, "rw");
+            
+            int tmp_int = 0;
+            float tmp_float = 0;
+            String tmp_string = "";
+
+            // read globalId
+            tmp_int = raf.readInt();
+            originString += Integer.toString(tmp_int).length();
+            originString += tmp_int;
+  
+            while(raf.getFilePointer() < raf.length() - 1) {
+
+                originString += raf.readByte(); // read lapide
+
+                // read size
+                tmp_int = raf.readInt();
+                originString += Integer.toString(tmp_int).length();
+                originString += tmp_int;
+
+                // read Id
+                tmp_int = raf.readInt();
+                originString += Integer.toString(tmp_int).length();
+                originString += tmp_int;
+
+                // read name, user, pass, cpf, city
+                for(int x = 0; x < 5; x++) {
+
+                    tmp_string = raf.readUTF();
+                    originString += tmp_string.length();
+                    originString += tmp_string;
+                }
+
+                // read balance
+                tmp_float = raf.readFloat();
+                originString += Float.toString(tmp_float).length();
+                originString += tmp_float;
+
+                // read transactions
+                tmp_int = raf.readInt();
+                originString += Integer.toString(tmp_int).length();
+                originString += tmp_int;
+
+                // read emails number
+                tmp_int = raf.readInt();
+                originString += Integer.toString(tmp_int).length();
+                originString += tmp_int;
+
+                // read emails
+                for(int i = 0; i < tmp_int; i++) {
+                    
+                    tmp_string = raf.readUTF();
+                    originString += tmp_string.length();
+                    originString += tmp_string;
+                }
+            }
+
+            raf.close();
+        }
+        catch(Exception e) { e.printStackTrace(); }
+
+        System.out.println(originString);
+
+        // --------------------------------------------------- //
+
+        // 2. Create dictionary
+        originString = originString.replaceAll(" ", "_");
+
         ArrayList<String> dictionary = new ArrayList<String>();
 
-        for(int i = 0; i < origin.length(); i++) {
+        for(int i = 0; i < originString.length(); i++) {
 
-            String s = Character.toString(origin.charAt(i));
+            String s = Character.toString(originString.charAt(i));
             
             if(!dictionary.contains(s)) dictionary.add(s);
         }
 
         // -------------------------------------------------------------- //
 
+        // 3. Create dictionary output
         ArrayList<Integer> output = new ArrayList<Integer>();
 
-        for(int i = 0; i < origin.length(); i++) {
+        for(int i = 0; i < originString.length(); i++) {
 
-            String s = Character.toString(origin.charAt(i));
+            String s = Character.toString(originString.charAt(i));
 
             while(true) {
 
-                if(i == origin.length() - 1) break;
+                if(i == originString.length() - 1) break;
 
-                s += origin.charAt(i + 1);
+                s += originString.charAt(i + 1);
 
                 if(dictionary.contains(s)) {
                     
-                    if(i == origin.length() - 2) {
+                    if(i == originString.length() - 2) {
                         
                         output.add(dictionary.indexOf(s));
                         break;
@@ -44,7 +117,7 @@ class LZW {
 
                     dictionary.add(s);
                     
-                    if(i == origin.length() - 2) output.add(dictionary.indexOf(s));
+                    if(i == originString.length() - 2) output.add(dictionary.indexOf(s));
                     else output.add(dictionary.indexOf(s.substring(0, s.length() - 1)));
                     break;
                 }
@@ -52,49 +125,41 @@ class LZW {
 
             // --------------- //
 
-            if(i == origin.length() - 1) break;
+            if(i == originString.length() - 1) break;
         }
 
-        for(Integer i : output) System.out.print(dictionary.get(i));
+        // -------------------------------------------------------------- //
+
+        // 4. Create compressed file
+        RandomAccessFile raf = new RandomAccessFile("compactado.pedrip", "rw");
+
+        raf.writeInt(dictionary.size());
+
+        for(String str : dictionary) raf.writeUTF(str);
+
+        raf.writeInt(output.size());
+
+        if(dictionary.size() < 256) {
+
+            for(int i : output) raf.writeByte(i);
+        }
+        else if(dictionary.size() < 65536) {
+
+            for(int i : output) raf.writeShort(i);
+        }
+        else {
+
+            for(int i : output) raf.writeInt(i);
+        }
+
+        raf.close();
         return output;
     }
 
+    // ------------------------------------------------------------------------------------------------------------ //
+
     public static void main(String[] args) throws Exception {
-        
-        String s = "";
 
-        try {
-
-            String source = Main.DEFAULT_FILE;
-
-            RandomAccessFile raf = new RandomAccessFile(source, "rw");
-
-            s += raf.readInt();
-            
-            while(raf.getFilePointer() < raf.length() - 1) {
-
-                s += raf.readByte();
-                s += raf.readInt();
-                s += raf.readInt();
-
-                for(int x = 0; x < 5; x++) s += raf.readUTF();
-
-                s += raf.readFloat();
-                s += raf.readInt();
-
-                int emailsCount = raf.readInt();
-
-                s += emailsCount;
-                
-                for(int i = 0; i < emailsCount; i++) s += raf.readUTF();
-            }
-
-            raf.close();
-        }
-        catch(Exception e) { e.printStackTrace(); }
-
-        compact(s);
-
-        // -------------------------------------------------------------- //
+        compact(Main.DEFAULT_FILE);
     }
 }
