@@ -1,5 +1,6 @@
 import java.io.RandomAccessFile;
 import java.util.Scanner;
+import java.util.HashMap;
 
 // ---------------------------------------------------------------------------------------------------------------- //
 
@@ -12,12 +13,28 @@ public class Main {
     static final String DEFAULT_FILE_NAME = "indexByName.bin";
     static final String DEFAULT_FILE_BTREE = "btree.bin";
 
+    public static HashMap<Character, Integer> makeFrequency(String filename) {
+        var frequency = new HashMap<Character, Integer>();
+        try {
+            RandomAccessFile raf = new RandomAccessFile(DEFAULT_FILE, "rw");
+            while (raf.getFilePointer() < raf.length()) {
+                char c = (char) raf.readByte();
+                frequency.merge(c, 1, Integer::sum);
+            }
+            raf.seek(0);
+            raf.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return frequency;
+    }
+
     public static void main(String[] args) throws Exception {
 
         RandomAccessFile raf = new RandomAccessFile(DEFAULT_FILE, "rw");
 
         // Carga inicial
-        if(raf.length() == 0) {
+        if (raf.length() == 0) {
 
             raf.writeInt(0);
 
@@ -50,6 +67,7 @@ public class Main {
             System.out.println("6 - ORDENAR REGISTROS");
             System.out.println("7 - LISTAR REGISTROS");
             System.out.println("8 - LZW");
+            System.out.println("9 - Compactar e descompactar Huffman");
             System.out.println("================================\n");
 
             // ----------------------------------------------------------- //
@@ -57,26 +75,27 @@ public class Main {
             // Option verification
             do {
 
-                try { 
+                try {
 
-                    option = scr.nextInt(); 
+                    option = scr.nextInt();
 
-                    if(option < 0 || option > 8) System.out.println("x Opcao invalida!");
-                }
-                catch (Exception e) { 
+                    if (option < 0 || option > 9)
+                        System.out.println("x Opcao invalida!");
+                } catch (Exception e) {
 
-                    System.out.println("x Digite apenas numeros!"); 
+                    System.out.println("x Digite apenas numeros!");
 
                     scr.next();
                     break;
                 }
-            }
-            while(option < 0 || option > 8);
+            } while (option < 0 || option > 9);
 
             // Option execution
-            switch(option) {
+            switch (option) {
 
-                case 0: System.out.println("Saindo..."); break;
+                case 0:
+                    System.out.println("Saindo...");
+                    break;
 
                 // ----------------------------------------------------------- //
 
@@ -111,14 +130,13 @@ public class Main {
                         System.out.print("> Deseja adicionar mais emails? (s/n): ");
                         String answer = scr.next();
 
-                        if(answer.equals("s")) {
+                        if (answer.equals("s")) {
 
                             System.out.print("> Digite seu email: ");
                             ba.addEmail(scr.next());
-                        }
-                        else wishAdd = false;
-                    }
-                    while(wishAdd == true);
+                        } else
+                            wishAdd = false;
+                    } while (wishAdd == true);
 
                     System.out.print("> Digite o saldo: ");
                     ba.setBalance(scr.nextFloat());
@@ -148,9 +166,12 @@ public class Main {
                     BankAccount ba_origin = Crud.searchByUser(origin);
                     BankAccount ba_destiny = Crud.searchByUser(destiny);
 
-                    if(ba_origin == null) System.out.println("x Conta de origem nao encontrada!");
-                    else if(ba_destiny == null) System.out.println("x Conta de destino nao encontrada!");
-                    else if(ba_origin.getBalance() < value) System.out.println("x Saldo insuficiente!");
+                    if (ba_origin == null)
+                        System.out.println("x Conta de origem nao encontrada!");
+                    else if (ba_destiny == null)
+                        System.out.println("x Conta de destino nao encontrada!");
+                    else if (ba_origin.getBalance() < value)
+                        System.out.println("x Saldo insuficiente!");
                     else {
 
                         ba_origin.setBalance(ba_origin.getBalance() - value);
@@ -178,7 +199,8 @@ public class Main {
 
                     BankAccount ba = Crud.searchById(DEFAULT_FILE, id);
 
-                    if(ba == null) System.out.println("x Conta nao encontrada!");
+                    if (ba == null)
+                        System.out.println("x Conta nao encontrada!");
                     else {
 
                         System.out.println("\n>>> Conta encontrada!");
@@ -208,7 +230,8 @@ public class Main {
 
                     BankAccount ba = Crud.searchByUser(user);
 
-                    if(ba == null) System.out.println("x Conta nao encontrada!");
+                    if (ba == null)
+                        System.out.println("x Conta nao encontrada!");
                     else {
 
                         System.out.println("\n>>> Conta encontrada!");
@@ -238,24 +261,24 @@ public class Main {
 
                         do {
 
-                            try { 
+                            try {
 
-                                updateOption = scr.nextInt(); 
+                                updateOption = scr.nextInt();
 
-                                if(updateOption < 0 || updateOption > 7) System.out.println("x Opcao invalida!");
-                            }
-                            catch (Exception e) { 
+                                if (updateOption < 0 || updateOption > 7)
+                                    System.out.println("x Opcao invalida!");
+                            } catch (Exception e) {
 
-                                System.out.println("x Digite apenas numeros!"); 
+                                System.out.println("x Digite apenas numeros!");
 
                                 scr.next();
                             }
-                        }
-                        while(updateOption < 0 || updateOption > 7);
+                        } while (updateOption < 0 || updateOption > 7);
 
-                        switch(updateOption) {
+                        switch (updateOption) {
 
-                            case 0: break;
+                            case 0:
+                                break;
 
                             case 1: {
 
@@ -301,7 +324,7 @@ public class Main {
                                 System.out.print("> Deseja adicionar mais um email? (s/n): ");
                                 String answer = scr.next();
 
-                                while(answer.equals("s")) {
+                                while (answer.equals("s")) {
 
                                     System.out.print("> Digite o novo email: ");
                                     ba.addEmail(scr.next());
@@ -313,7 +336,7 @@ public class Main {
                             }
                         }
 
-                        if(updateOption != 0) {
+                        if (updateOption != 0) {
 
                             Crud.update(ba);
 
@@ -335,7 +358,8 @@ public class Main {
 
                     BankAccount ba = Crud.searchById(DEFAULT_FILE, id);
 
-                    if(ba == null) System.out.println("x Conta nao encontrada!");
+                    if (ba == null)
+                        System.out.println("x Conta nao encontrada!");
                     else {
 
                         System.out.println("\n>>> Conta encontrada!");
@@ -353,7 +377,7 @@ public class Main {
                         System.out.print("> Deseja realmente deletar esta conta? (s/n): ");
                         String answer = scr.next();
 
-                        if(answer.equals("s")) {
+                        if (answer.equals("s")) {
 
                             Crud.delete(ba);
 
@@ -382,20 +406,19 @@ public class Main {
 
                     do {
 
-                        try { 
+                        try {
 
-                            updateOption = scr.nextInt(); 
+                            updateOption = scr.nextInt();
 
-                            if(updateOption < 0 || updateOption > 6) System.out.println("x Opcao invalida!");
-                        }
-                        catch (Exception e) { 
+                            if (updateOption < 0 || updateOption > 6)
+                                System.out.println("x Opcao invalida!");
+                        } catch (Exception e) {
 
-                            System.out.println("x Digite apenas numeros!"); 
+                            System.out.println("x Digite apenas numeros!");
 
                             scr.next();
                         }
-                    }
-                    while(updateOption < 0 || updateOption > 6);
+                    } while (updateOption < 0 || updateOption > 6);
 
                     System.out.println("\n========== ORDEM DE REGISTROS ==========");
                     System.out.println("> Digite a quantidade M de registros: ");
@@ -404,20 +427,19 @@ public class Main {
 
                     do {
 
-                        try { 
+                        try {
 
-                            m = scr.nextInt(); 
+                            m = scr.nextInt();
 
-                            if(m < 0 || m > 10) System.out.println("x Insira no minimo 0 e no maximo 10!");
-                        }
-                        catch (Exception e) { 
+                            if (m < 0 || m > 10)
+                                System.out.println("x Insira no minimo 0 e no maximo 10!");
+                        } catch (Exception e) {
 
-                            System.out.println("x Digite apenas numeros!"); 
+                            System.out.println("x Digite apenas numeros!");
 
                             scr.next();
                         }
-                    }
-                    while(m < 0 || m > 10);
+                    } while (m < 0 || m > 10);
 
                     System.out.println("> Digite a quantidade N de caminhos: ");
 
@@ -425,24 +447,24 @@ public class Main {
 
                     do {
 
-                        try { 
+                        try {
 
-                            n = scr.nextInt(); 
+                            n = scr.nextInt();
 
-                            if(n < 0 || n > 10) System.out.println("x Insira no minimo 0 e no maximo 10!");
-                        }
-                        catch (Exception e) { 
+                            if (n < 0 || n > 10)
+                                System.out.println("x Insira no minimo 0 e no maximo 10!");
+                        } catch (Exception e) {
 
-                            System.out.println("x Digite apenas numeros!"); 
+                            System.out.println("x Digite apenas numeros!");
 
                             scr.next();
                         }
-                    }
-                    while(n < 0 || n > 10);
+                    } while (n < 0 || n > 10);
 
-                    switch(updateOption) {
+                    switch (updateOption) {
 
-                        case 0: break;
+                        case 0:
+                            break;
 
                         case 1: {
 
@@ -495,7 +517,7 @@ public class Main {
 
                     System.out.println("\n========== LISTAR REGISTROS ==========");
 
-                    for(BankAccount ba : Order.readAll(DEFAULT_FILE)) {
+                    for (BankAccount ba : Order.readAll(DEFAULT_FILE)) {
 
                         System.out.println("ID: " + ba.getId());
                         System.out.println("Nome: " + ba.getName());
@@ -525,26 +547,26 @@ public class Main {
 
                     do {
 
-                        try { 
+                        try {
 
-                            lzwOption = scr.nextInt(); 
+                            lzwOption = scr.nextInt();
 
-                            if(lzwOption < 0 || lzwOption > 2) System.out.println("x Opcao invalida!");
-                        }
-                        catch (Exception e) { 
+                            if (lzwOption < 0 || lzwOption > 2)
+                                System.out.println("x Opcao invalida!");
+                        } catch (Exception e) {
 
-                            System.out.println("x Digite apenas numeros!"); 
+                            System.out.println("x Digite apenas numeros!");
 
                             scr.next();
                         }
-                    }
-                    while(lzwOption < 0 || lzwOption > 2);
+                    } while (lzwOption < 0 || lzwOption > 2);
 
                     // -------------------------- //
 
-                    switch(lzwOption) {
+                    switch (lzwOption) {
 
-                        case 0: break;
+                        case 0:
+                            break;
 
                         case 1: {
 
@@ -566,14 +588,36 @@ public class Main {
 
                             LZW.decompress(fileName, Main.DEFAULT_FILE);
 
-                            System.out.println("\n>>> Arquivo descompactado com sucesso em \"" + Main.DEFAULT_FILE + "\"!");
+                            System.out.println(
+                                    "\n>>> Arquivo descompactado com sucesso em \"" + Main.DEFAULT_FILE + "\"!");
                             break;
                         }
                     }
                 }
+                case 9:{
+                    System.out.println("\n======= HUFFMAN ========="); 
+                    var frequency = makeFrequency(DEFAULT_FILE);
+                    var tree = new Huffman(frequency);
+                    tree.traverse(Huffman.root, "");
+                    try {
+                        RandomAccessFile source = new RandomAccessFile(DEFAULT_FILE, "rw");
+                        RandomAccessFile dest = new RandomAccessFile("h_compressed.bin", "rw");
+                        RandomAccessFile desc = new RandomAccessFile("h_descompressed.bin", "rw");
+                        Huffman.compress(source, dest);
+                        Huffman.decompress(dest, desc);
+            
+                        source.seek(0);
+                        dest.seek(0);
+                        source.close();
+                        dest.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println("Arquivos h_compressed.bin, h_descompressed.bin criados");
+                    System.out.println("Feito!");
+                }
             }
-        }
-        while(option != 0);
+        } while (option != 0);
 
         // ----------------------------------------------------------- //
 
