@@ -593,8 +593,11 @@ public class Main {
                             break;
                         }
                     }
+                    break;
                 }
-                case 9:{
+
+                case 9: {
+
                     System.out.println("\n======= HUFFMAN ========="); 
                     var frequency = makeFrequency(DEFAULT_FILE);
                     var tree = new Huffman(frequency);
@@ -615,7 +618,9 @@ public class Main {
                     }
                     System.out.println("Arquivos h_compressed.bin, h_descompressed.bin criados");
                     System.out.println("Feito!");
+                    break;
                 }
+                
             }
         } while (option != 0);
 
